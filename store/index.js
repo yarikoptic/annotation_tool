@@ -103,7 +103,7 @@ export const state = () => ({
 
     // This is a computed direct map between current categories and CSS classes
     // See getter 'categoryClasses'
-    categoryClasses: null,
+    categoryClasses: {},
 
     // The following fields are only accessed by store methods
 
@@ -579,6 +579,12 @@ export const getters = {
         return p_state.categories;
     },
 
+    categoryClasses(p_state) {
+
+        return p_state.categoryClasses;
+
+    },
+
     columnDescription: (p_state) => (p_columnName) => {
 
         // 0. If we do not have a data dictionary then the column description is undefined (e.g. 'null')
@@ -639,7 +645,6 @@ export const getters = {
 
         return null;
     },
-
 
     isColumnLinkedToCategory: (p_state) => (p_matchData) => {
 
@@ -728,6 +733,67 @@ export const getters = {
         }
     },
 
+    nextPageAccessible: (p_state) => (p_pageName) => {
+
+        let accessible = false;
+
+        switch ( p_pageName ) {
+
+            case "categorization":
+                break;
+
+            case "annotation": {
+
+                // 1. Count the number of columns that have had categories linked to them
+                let linkedColumns = 0;
+                for ( const column in p_state.columnToCategoryMap ) {
+                    if ( null !== p_state.columnToCategoryMap[column] )
+                        linkedColumns += 1;
+                }
+
+                // 2. Determine if at least one column has been linked to a category
+                const categorizationStatus = linkedColumns > 0;
+
+                // 3. Determine if all columns assigned the 'Assessment Tool' category have been grouped
+                const assessmentToolColumns = [];
+                for ( const column in p_state.columnToCategoryMap ) {
+                    if ( "Assessment Tool" === p_state.columnToCategoryMap[column] ) {
+                        assessmentToolColumns.push(column);
+                    }
+                }
+
+                // 3. Make sure all assessment tool columns are grouped
+                for ( const toolGroup in p_state.toolGroups ) {
+                    for ( const tool of p_state.toolGroups[toolGroup] ) {
+                        const columnIndex = assessmentToolColumns.indexOf(tool);
+                        assessmentToolColumns.splice(columnIndex, 1);
+                    }
+                }
+                const toolGroupingStatus = ( 0 === assessmentToolColumns.length );
+
+                // 4. Make sure one (and only one) column has been categorized as 'Subject ID'
+                let subjectIDFound = 0;
+                for ( const column in p_state.columnToCategoryMap ) {
+                    if ( "Subject ID" === p_state.columnToCategoryMap[column] ) {
+                        subjectIDFound += 1;
+                    }
+                }
+                const singleSubjectIDColumn = ( 1 === subjectIDFound );
+
+                // Annotation page is only accessible if at least one column has
+                // been categorized and all assessment tools have been grouped
+                // and if one (and only one) column has been categorized as 'Subject ID'
+                accessible = categorizationStatus && toolGroupingStatus && singleSubjectIDColumn;
+
+                break;
+            }
+
+            case "download":
+                break;
+        }
+
+        return accessible;
+    },
 
     valueDescription: (p_state) => (p_columnName, p_value) => {
 
