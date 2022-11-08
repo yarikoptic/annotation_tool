@@ -473,6 +473,14 @@ export const mutations = {
 
     // Categorization page
 
+    addCategory(p_state, p_data) {
+
+        console.log(`addCategory call with ${JSON.stringify(p_data)}`);
+        console.log(`Before: ${p_state.categories}`);
+        p_state.categories.push(p_data.category);
+        console.log(`After: ${p_state.categories}`);
+    },
+
     addColumnCategorization(p_state, p_data) {
 
         // Save the categorization-column link in the annotated table
@@ -503,6 +511,11 @@ export const mutations = {
         const groupIndex = p_state.annotationDetails.findIndex(detail =>
             p_toolGroupData.name === detail?.groupName);
         p_state.annotationDetails.splice(groupIndex, 1);
+    },
+
+    removeCategory(p_state, p_categoryName) {
+
+        p_state.categories = p_state.categories.filter(name => p_categoryName !== name);
     },
 
     removeColumnCategorization(p_state, p_columnName) {
