@@ -18,19 +18,17 @@
                     thead-class="hidden" />
                 <b-icon-plus-circle
                     style="display: block; margin-left: auto; margin-right: auto;"
-                    @click="growTable" />
+                    @click="addCustomCategory" />
             </b-col>
             <b-col cols="1" class="no-padding-col">
                 <b-table
                     borderless
                     :items="categoryXs"
                     :tbody-tr-class="styleXRow"
-                    @row-clicked="deleteCategory"
+                    @row-clicked="deleteCustomCategory"
                     thead-class="hidden" />
             </b-col>
         </b-row>
-
-
 
         <!-- <b-input-group>
             <b-form-input
@@ -42,7 +40,7 @@
         <b-row style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;">
             <b-col cols="6" style="padding-left: 0;">
                 <b-button
-                    @click="growTable"
+                    @click="addCustomCategory"
                     variant="dark">
                     Add Category
                 </b-button>
@@ -64,11 +62,10 @@
 
 <script>
 
-    // Allows for reference to store data by creating simple, implicit getters
-    import { mapGetters } from "vuex";
-    import { mapMutations } from "vuex";
+    // Allows for reference to store getters, mutations, actions
+    import { mapGetters, mapMutations, mapActions } from "vuex";
 
-    // import { BIconPlusCircle, BIconXCircle, BIconXCircleFill } from "bootstrap-vue";
+    // + icon for adding new categories
     import { BIconPlusCircle } from "bootstrap-vue";
 
     export default {
@@ -82,8 +79,6 @@
             return {
 
                 newCategoryName: "",
-
-                originalCategories: ["Subject ID", "Age", "Sex", "Diagnosis", "Assessment Tool"],
 
                 // Since categories is now retrieved via mapGetters, 'categories'
                 // is not available here, but is upon creation
@@ -107,14 +102,11 @@
             ...mapGetters([
 
                 "categories",
-                "categoryClasses"
+                "categoryClasses",
+                "originalCategories"
             ]),
 
             categoryTable() {
-
-                console.log("categoryTable call");
-                console.log(`categories: ${this.categories}`);
-                console.log(`original category: ${this.inOriginalCategories("NEW CATEGORY")}`);
 
                 // Return a list of dicts for each category in the table
                 return this.categories.map((name) => ({
@@ -132,36 +124,48 @@
 
         methods: {
 
+            ...mapActions([
+
+                "initializeCategories"
+            ]),
+
             ...mapMutations([
 
                 "addCategory",
                 "removeCategory"
             ]),
 
-            deleteCategory(p_item, p_index, p_event) {
+            deleteCustomCategory(p_item, p_index, p_event) {
 
-                console.log(`DELETE CATEGORY with ${JSON.stringify(p_item)}`);
-
-                // Need to match index with categoryTable
+                // NOTE: Need to match index with categoryTable
 
                 if ( !this.originalCategories.includes(this.categories[p_index]) ) {
 
+                    // 1. Remove this category from the list of categories and
+                    // unlink related data table columns
                     this.removeCategory(this.categories[p_index]);
+
+                    // 2. Snap currently selected category back to the first category
+                    this.selectCategory([{ category: this.categories[0]}]);
                 }
             },
 
-            growTable() {
+            addCustomCategory() {
 
-                console.log("growTable call");
+                // 1. Add the new category
 
-                // Store currently selected category
+                // A. Store currently selected category
                 const tempCategory = this.selectedCategory;
 
-                // Add new category
+                // B. Add new category
                 this.addCategory({ category: "NEW CATEGORY"});
 
-                // Restore currently selected category
+                // C. Restore currently selected category
                 this.selectedCategory = tempCategory;
+
+                // 2. Ensure category class list in store includes style for new category
+                this.initializeCategories(this.categories);
+
             },
 
             inOriginalCategories(p_name) {
@@ -196,8 +200,6 @@
             },
 
             styleXRow(p_row, p_rowType) {
-
-                console.log(`P_ROW: ${JSON.stringify(p_row)}`);
 
                 return ( "X" === p_row.x ) ? "visible-x" : "transparent-x";
             }
@@ -237,14 +239,16 @@
         padding-right: 0;
     }
 
+    .transparent-x {
+
+        color: black;
+        opacity: 0.0;
+    }
+
     .visible-x {
 
         color: black;
-    }
-
-    .transparent-x {
-
-        color: white;
+        opacity: 1.0;
     }
 
 </style>

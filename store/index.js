@@ -99,6 +99,9 @@ export const state = () => ({
 
     // Hardcoded list of categories used on the categorization page
     // and possibly elsewhere in the tool
+    originalCategories: ["Subject ID", "Age", "Sex", "Diagnosis", "Assessment Tool"],
+
+    // Category list that allows for user-defined categories in addition to the originals
     categories: [],
 
     // This is a computed direct map between current categories and CSS classes
@@ -122,6 +125,7 @@ export const state = () => ({
         color3: "category-style-2",
         color4: "category-style-3",
         color5: "category-style-4",
+        color6: "category-style-5",
         colorDefault: "category-style-default"
     },
 
@@ -475,10 +479,7 @@ export const mutations = {
 
     addCategory(p_state, p_data) {
 
-        console.log(`addCategory call with ${JSON.stringify(p_data)}`);
-        console.log(`Before: ${p_state.categories}`);
         p_state.categories.push(p_data.category);
-        console.log(`After: ${p_state.categories}`);
     },
 
     addColumnCategorization(p_state, p_data) {
@@ -515,7 +516,15 @@ export const mutations = {
 
     removeCategory(p_state, p_categoryName) {
 
+        // 1. Remove this category from the category list
         p_state.categories = p_state.categories.filter(name => p_categoryName !== name);
+
+        // 2. Unlink any data table column previously assigned this now deleted category
+        for ( const columnName in p_state.columnToCategoryMap ) {
+            if ( p_categoryName === p_state.columnToCategoryMap[columnName] ) {
+                p_state.columnToCategoryMap[columnName] = null;
+            }
+        }
     },
 
     removeColumnCategorization(p_state, p_columnName) {
@@ -806,6 +815,11 @@ export const getters = {
         }
 
         return accessible;
+    },
+
+    originalCategories(p_state) {
+
+        return p_state.originalCategories;
     },
 
     valueDescription: (p_state) => (p_columnName, p_value) => {
