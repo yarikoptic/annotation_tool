@@ -41,9 +41,9 @@ describe("The column-linking-table component", () => {
 
                     return [
 
-                        { name: "participant_id", description: "descriptions help" },
-                        { name: "age", description: "descriptions help" },
-                        { name: "sex", description: "descriptions help" }
+                        { name: "participant_id" },
+                        { name: "age" },
+                        { name: "sex" }
                     ];
                 },
 
