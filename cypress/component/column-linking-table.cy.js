@@ -79,9 +79,9 @@ const props = {
 
 // Tests
 
-describe("Tests basic functionality of the table that links categories with data table columns", () => {
+describe("The column-linking-table component", () => {
 
-    it("Alter link relation (add/remove) between a column and a category", () => {
+    it("can alter link relation (add/remove) between a column and a category", () => {
 
         // 0. The first category and column
         const participantIDColumn = store.getters.columns()[0].name;
