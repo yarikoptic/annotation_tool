@@ -1,19 +1,24 @@
 import { getters } from "~/store/index-refactor";
 
 
+const state = {
+    dataDictionary : {
+        annotated: {
+            "describedColumn": {
+                description: "This is my first column"
+            },
+            "lazyColumn": {}
+        }
+    }
+};
+
 describe("getColumnDescription", () => {
     it("returns description for a column if one exists", () => {
-        const state = {
-            dataDictionary : {
-                annotated: {
-                    "column1": {
-                        description: "This is my first column"
-                    },
-                    "column2": {}
-                }
-            }
-        };
-        const result = getters.getColumnDescription(state, "column1");
+        const result = getters.getColumnDescription(state, "describedColumn");
         expect(result).to.be.equal("This is my first column");
+    });
+    it("returns an empty string if no descripton exists", () => {
+        const result = getters.getColumnDescription(state, "lazyColumn");
+        expect(result).to.be.empty;
     });
 });

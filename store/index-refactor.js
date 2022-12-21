@@ -20,9 +20,13 @@ export const getters = {
         return Object.keys(p_state.categories);
     },
     getColumnDescription (p_state, p_columnName) {
-        return p_state.dataDictionary.annotated[p_columnName].description;
+        if ( Object.hasOwn(p_state.dataDictionary.annotated[p_columnName], "description") ) {
+            return p_state.dataDictionary.annotated[p_columnName].description;
+        }
+        else {
+            return "";
+        }
     }
-
 };
 
 
